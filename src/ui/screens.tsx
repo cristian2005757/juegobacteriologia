@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { CARDS, CASES, MECHANISMS, TABLE } from "../game/data";
 import type { Action, GameState } from "../game/logic";
 import { tally } from "../game/logic";
@@ -10,14 +11,36 @@ import { MuteButton } from "./sound";
 import { TowerMap } from "./TowerMap";
 
 const ORDER: Mechanism[] = ["pared", "proteina", "acidos", "membrana", "metabolica"];
+const NAME_KEY = "selectiva-nombre";
 
 export function TitleScreen({ dispatch }: { dispatch: (action: Action) => void }) {
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    setName(localStorage.getItem(NAME_KEY) ?? "");
+  }, []);
+
+  function rename(value: string) {
+    const next = value.slice(0, 48);
+    setName(next);
+    localStorage.setItem(NAME_KEY, next);
+  }
+
   return (
     <section className="shell screen title-screen">
       <div className="title-copy">
         <p className="kicker">Guardia de infectología</p>
         <h1>Selectiva</h1>
-        <p className="author">Daniel Carrillo Ureña · 1127044674</p>
+        <label className="author-field">
+          <span>Tu nombre</span>
+          <input
+            value={name}
+            maxLength={48}
+            placeholder="Escribe tu nombre"
+            autoComplete="name"
+            onChange={(event) => rename(event.target.value)}
+          />
+        </label>
         <p className="lede">
           Cada carta es un antibiótico. Solo baja el cultivo si esta bacteria todavía tiene el sitio que ese fármaco reconoce.
         </p>

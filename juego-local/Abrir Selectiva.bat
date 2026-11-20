@@ -3,7 +3,6 @@ cd /d "%~dp0"
 title Selectiva
 echo.
 echo  Selectiva
-echo  Daniel Carrillo Ureña
 echo.
 echo  El juego se abre en el navegador.
 echo  No cierres esta ventana mientras juegas.

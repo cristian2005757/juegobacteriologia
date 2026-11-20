@@ -220,7 +220,7 @@ export function CombatScreen({
 
             <article className="plate ally-plate">
               <div className="plate-copy">
-                <p className="plate-name">Paciente</p>
+                <p className="plate-name">Estado clínico</p>
                 <div className={`bar ${patientRatio < 0.35 ? "is-low" : patientRatio < 0.55 ? "is-mid" : ""}`}>
                   <span style={{ width: `${patientRatio * 100}%` }} />
                 </div>
