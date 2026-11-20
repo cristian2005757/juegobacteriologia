@@ -17,6 +17,7 @@ export function TitleScreen({ dispatch }: { dispatch: (action: Action) => void }
       <div className="title-copy">
         <p className="kicker">Guardia de infectología</p>
         <h1>Selectiva</h1>
+        <p className="author">Daniel Carrillo Ureña · 1127044674</p>
         <p className="lede">
           Cada carta es un antibiótico. Solo baja el cultivo si esta bacteria todavía tiene el sitio que ese fármaco reconoce.
         </p>

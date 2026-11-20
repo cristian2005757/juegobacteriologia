@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Selectiva — dianas antibióticas</title>
+    <title>Selectiva — Daniel Carrillo Ureña</title>
     <meta
       name="description"
       content="Juego didáctico sobre los mecanismos de acción de los antibióticos."
@@ -19,6 +19,16 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      if (location.protocol === "file:") {
+        document.addEventListener("DOMContentLoaded", function () {
+          var note = document.createElement("p");
+          note.textContent = "Para jugar, cierra esto y abre Abrir Selectiva.bat. Este archivo no arranca solo.";
+          note.style.cssText = "margin:0;padding:18px 22px;background:#102228;color:#f4efe6;font:16px Segoe UI,sans-serif";
+          document.body.prepend(note);
+        });
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -113,9 +113,16 @@ h1, h2, h3, .serif {
   position: relative;
 }
 .title-screen h1 {
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   font-size: clamp(64px, 8vw, 112px);
   line-height: 0.86;
+}
+.author {
+  margin: 0 0 14px;
+  color: var(--gold);
+  font-family: Fraunces, Georgia, serif;
+  font-size: clamp(20px, 2.4vw, 28px);
+  letter-spacing: 0.01em;
 }
 .mech-strip { display: flex; gap: 8px; padding: 0; margin: 28px 0 0; list-style: none; }
 .mech-strip li, .chip {
