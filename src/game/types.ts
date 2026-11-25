@@ -111,7 +111,21 @@ export interface JournalEntry {
 export interface FloatText {
   id: number;
   text: string;
-  kind: "hurt" | "miss" | "synergy" | "self" | "patient";
+  kind: "hurt" | "miss" | "synergy" | "self" | "patient" | "score";
+}
+
+export interface QuizMark {
+  fits: boolean;
+  points: number;
+  seconds: number;
+}
+
+export interface CaseScore {
+  caseIndex: number;
+  title: string;
+  points: number;
+  hits: number;
+  questions: number;
 }
 
 export type Screen =
@@ -157,4 +171,6 @@ export interface CombatState {
   lost: boolean;
   phasesFired: number[];
   seq: number;
+  quizPoints: number;
+  quizMarks: QuizMark[];
 }

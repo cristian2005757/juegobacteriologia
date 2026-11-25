@@ -1,6 +1,7 @@
 import { assess, CASES, CARDS, ENERGY, STARTER } from "./data";
 import { cardPrice, type HeroId } from "./heroes";
-import type { CardId, CombatState, FloatText, JournalEntry, Screen } from "./types";
+import { questionPoints } from "./score";
+import type { CardId, CaseScore, CombatState, FloatText, JournalEntry, Screen } from "./types";
 
 export interface GameState {
   screen: Screen;
@@ -12,6 +13,8 @@ export interface GameState {
   combat: CombatState | null;
   rewardOptions: CardId[];
   seed: number;
+  score: number;
+  caseScores: CaseScore[];
 }
 
 export type Action =
@@ -24,7 +27,7 @@ export type Action =
   | { type: "open-case"; index: number }
   | { type: "begin" }
   | { type: "admit" }
-  | { type: "play"; index: number }
+  | { type: "play"; index: number; elapsedMs: number }
   | { type: "end-turn" }
   | { type: "to-debrief" }
   | { type: "continue" }
@@ -44,6 +47,8 @@ export const initialState: GameState = {
   combat: null,
   rewardOptions: [],
   seed: sessionSeed,
+  score: 0,
+  caseScores: [],
 };
 
 function createRng(seed: number) {
@@ -153,12 +158,14 @@ function beginCombat(state: GameState, index: number): GameState {
     lost: false,
     phasesFired: [],
     seq: 1,
+    quizPoints: 0,
+    quizMarks: [],
   };
   combat = applyPhase(combat);
   return { ...state, screen: "combat", caseIndex: index, combat, seed: rng.finish() };
 }
 
-function playCard(state: GameState, index: number): GameState {
+function playCard(state: GameState, index: number, elapsedMs: number): GameState {
   const combat = state.combat;
   if (!combat || combat.won || combat.lost) return state;
   const id = combat.hand[index];
@@ -195,6 +202,10 @@ function playCard(state: GameState, index: number): GameState {
   if (result.fits && slowGain > 0) floats.push({ id: seq++, text: `ataque −${slowGain}`, kind: "synergy" });
   if (result.self > 0) floats.push({ id: seq++, text: `−${result.self}`, kind: "self" });
 
+  const points = questionPoints(result.fits, elapsedMs);
+  const seconds = Math.max(0, Math.round(Math.min(120_000, elapsedMs) / 1000));
+  if (points > 0) floats.push({ id: seq++, text: `+${points}`, kind: "score" });
+
   return {
     ...state,
     combat: {
@@ -218,6 +229,8 @@ function playCard(state: GameState, index: number): GameState {
       motion: "shake",
       motionKey: combat.motionKey + 1,
       seq,
+      quizPoints: combat.quizPoints + points,
+      quizMarks: [...combat.quizMarks, { fits: result.fits, points, seconds }],
     },
   };
 }
@@ -310,12 +323,27 @@ export function reducer(state: GameState, action: Action): GameState {
       if (state.screen !== "reception" || state.cleared >= CASES.length) return state;
       return beginCombat(state, state.cleared);
     case "play":
-      return playCard(state, action.index);
+      return playCard(state, action.index, action.elapsedMs);
     case "end-turn":
       return endTurn(state);
-    case "to-debrief":
-      if (!state.combat?.won) return state;
-      return { ...state, screen: "debrief", cleared: state.caseIndex + 1 };
+    case "to-debrief": {
+      const combat = state.combat;
+      if (state.screen !== "combat" || !combat?.won) return state;
+      const caseScore: CaseScore = {
+        caseIndex: state.caseIndex,
+        title: CASES[state.caseIndex].title,
+        points: combat.quizPoints,
+        hits: combat.quizMarks.filter((mark) => mark.fits).length,
+        questions: combat.quizMarks.length,
+      };
+      return {
+        ...state,
+        screen: "debrief",
+        cleared: state.caseIndex + 1,
+        score: state.score + combat.quizPoints,
+        caseScores: [...state.caseScores, caseScore],
+      };
+    }
     case "continue": {
       if (!state.combat?.won) return state;
       const reward = CASES[state.caseIndex].reward;

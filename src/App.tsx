@@ -42,11 +42,11 @@ export default function App() {
         {state.screen === "map" && <MapScreen state={state} dispatch={dispatch} />}
         {state.screen === "brief" && <BriefScreen state={state} dispatch={dispatch} />}
         {state.screen === "combat" && state.combat && (
-          <CombatScreen combat={state.combat} dispatch={dispatch} />
+          <CombatScreen combat={state.combat} score={state.score} dispatch={dispatch} />
         )}
         {state.screen === "debrief" && <DebriefScreen state={state} dispatch={dispatch} />}
         {state.screen === "reward" && <RewardScreen state={state} dispatch={dispatch} />}
-        {state.screen === "ending" && <EndingScreen dispatch={dispatch} />}
+        {state.screen === "ending" && <EndingScreen state={state} dispatch={dispatch} />}
       </div>
     </>
   );

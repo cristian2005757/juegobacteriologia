@@ -4,6 +4,7 @@ import { assess, CASES, CARDS } from "../game/data";
 import { cardPrice, heroById } from "../game/heroes";
 import type { Action } from "../game/logic";
 import { previewContext } from "../game/logic";
+import { QUESTION_GRACE_MS, formatClock, questionPoints } from "../game/score";
 import type { CardId, CombatState, Trait } from "../game/types";
 import { Ecg, MECHANISM_SRC, Organism, Party } from "./art";
 import { CardView } from "./CardView";
@@ -31,11 +32,50 @@ function liveTraits(traits: Trait[], tags: readonly string[]): Trait[] {
   });
 }
 
+function QuizHud({
+  stamp,
+  frozen,
+  points,
+  clock,
+}: {
+  stamp: string;
+  frozen: boolean;
+  points: number;
+  clock: { current: number };
+}) {
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (frozen) return;
+    clock.current = Date.now();
+    setElapsed(0);
+  }, [stamp, frozen, clock]);
+
+  useEffect(() => {
+    if (frozen) return;
+    const id = window.setInterval(() => setElapsed(Date.now() - clock.current), 200);
+    return () => window.clearInterval(id);
+  }, [stamp, frozen, clock]);
+
+  const worth = questionPoints(true, elapsed);
+  const tone = elapsed < QUESTION_GRACE_MS ? "" : elapsed < 20_000 ? "is-late" : "is-slow";
+
+  return (
+    <div className={`quiz-pill ${tone}`} aria-live="polite">
+      <span>Tiempo {formatClock(elapsed)}</span>
+      <strong>Vale {worth}</strong>
+      <span>Puntos {points}</span>
+    </div>
+  );
+}
+
 export function CombatScreen({
   combat,
+  score,
   dispatch,
 }: {
   combat: CombatState;
+  score: number;
   dispatch: (action: Action) => void;
 }) {
   const kase = CASES[combat.caseIndex];
@@ -44,6 +84,8 @@ export function CombatScreen({
   const [deny, setDeny] = useState(0);
   const heard = useRef(combat.motionKey);
   const heardEnd = useRef<"open" | "won" | "lost">("open");
+  const askedAt = useRef(Date.now());
+  const questionStamp = `${combat.caseIndex}-${combat.turn}-${combat.hand.length}`;
 
   const expectedAttack = Math.max(0, combat.attack - combat.slow);
   const patientRatio = combat.patient / combat.patientMax;
@@ -78,7 +120,7 @@ export function CombatScreen({
     const result = assess(id, previewContext(combat.tags, kase.id, combat.playedThisTurn, id));
     setGhost({ id, ok: result.fits, key: combat.seq });
     setHover(null);
-    dispatch({ type: "play", index });
+    dispatch({ type: "play", index, elapsedMs: Date.now() - askedAt.current });
   }
 
   useEffect(() => {
@@ -147,6 +189,12 @@ export function CombatScreen({
             <i key={index} className={index < combat.energy ? "on" : ""} />
           ))}
         </div>
+        <QuizHud
+          stamp={questionStamp}
+          frozen={combat.won || combat.lost}
+          points={score + combat.quizPoints}
+          clock={askedAt}
+        />
         <div className="top-meta">
           <span>Turno {combat.turn}</span>
           <span>
@@ -358,6 +406,11 @@ export function CombatScreen({
             <p className="seal">{combat.won ? "Cedió" : "Avanza"}</p>
             <h2>{combat.won ? "La infección cedió" : "La infección avanzó"}</h2>
             <p>{combat.won ? kase.winLine : combat.lesson.body}</p>
+            <p>
+              {combat.won
+                ? `Este caso suma ${combat.quizPoints} puntos.`
+                : `Estos ${combat.quizPoints} puntos no se guardan. Al reintentar, el tiempo vuelve a empezar.`}
+            </p>
             {combat.won ? (
               <button type="button" className="btn" onClick={() => dispatch({ type: "to-debrief" })}>
                 Leer la lección

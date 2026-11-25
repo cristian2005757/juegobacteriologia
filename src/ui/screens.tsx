@@ -5,6 +5,7 @@ import { tally } from "../game/logic";
 import type { Mechanism } from "../game/types";
 import { audio } from "../game/audio";
 import { heroById } from "../game/heroes";
+import { readBoard, rememberScore, type ScoreRow } from "../game/score";
 import { MECHANISM_SRC, Party } from "./art";
 import { CardView } from "./CardView";
 import { MuteButton } from "./sound";
@@ -13,11 +14,43 @@ import { TowerMap } from "./TowerMap";
 const ORDER: Mechanism[] = ["pared", "proteina", "acidos", "membrana", "metabolica"];
 const NAME_KEY = "selectiva-nombre";
 
+function ScoreBoard({ rows }: { rows: ScoreRow[] }) {
+  return (
+    <div className="board-wrap">
+      <h2>Mejores puntajes</h2>
+      {rows.length === 0 ? (
+        <p className="board-empty">Cuando alguien termine la guardia, su puntaje aparece aquí. La tabla se guarda en este computador.</p>
+      ) : (
+        <table className="board">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Puntos</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, index) => (
+              <tr key={`${row.name}-${row.at}`}>
+                <td>{index + 1}</td>
+                <td>{row.name}</td>
+                <td>{row.score}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
 export function TitleScreen({ dispatch }: { dispatch: (action: Action) => void }) {
   const [name, setName] = useState("");
+  const [rows, setRows] = useState<ScoreRow[]>([]);
 
   useEffect(() => {
     setName(localStorage.getItem(NAME_KEY) ?? "");
+    setRows(readBoard());
   }, []);
 
   function rename(value: string) {
@@ -75,6 +108,12 @@ export function TitleScreen({ dispatch }: { dispatch: (action: Action) => void }
               En el consultorio, camina con las flechas o tocando el suelo. Habla con espacio o tocando el recuadro de abajo.
             </span>
           </li>
+          <li>
+            <b>6</b>
+            <span>
+              <strong>Cada carta es una pregunta.</strong> Si encaja, empieza valiendo 100 puntos. Los primeros 8 segundos se mantienen; después baja 4 puntos por segundo, hasta 10. Si no encaja, vale 0. Al cerrar la guardia queda el puntaje.
+            </span>
+          </li>
         </ol>
         <div className="title-actions">
           <button type="button" className="btn" onClick={() => { audio.unlock(); audio.ui(); dispatch({ type: "start" }); }}>
@@ -85,6 +124,7 @@ export function TitleScreen({ dispatch }: { dispatch: (action: Action) => void }
           </button>
           <MuteButton />
         </div>
+        <ScoreBoard rows={rows} />
         <ul className="mech-strip">
           {ORDER.map((id) => (
             <li key={id} data-mechanism={id}>
@@ -278,6 +318,12 @@ export function DebriefScreen({ state, dispatch }: { state: GameState; dispatch:
       <article className="paper narrow-paper">
         <p className="kicker">Cama {kase.bed} · {kase.bacteria}</p>
         <h1>Lo que pasó en el cultivo</h1>
+        <p className="score-callout">
+          <strong>{state.caseScores.at(-1)?.points ?? 0} puntos</strong>
+          <span>
+            en este caso. La guardia lleva {state.score}. Una carta que encaja empieza en 100 y baja con el tiempo. Si no encaja, suma 0. Estos puntos quedan al ganar el caso.
+          </span>
+        </p>
         <ul className="bitacora">
           {(state.combat?.journal ?? []).map((entry, index) => (
             <li key={`${entry.title}-${index}`} className={entry.ok ? "ok" : "bad"}>
@@ -318,11 +364,31 @@ export function RewardScreen({ state, dispatch }: { state: GameState; dispatch: 
   );
 }
 
-export function EndingScreen({ dispatch }: { dispatch: (action: Action) => void }) {
+export function EndingScreen({ state, dispatch }: { state: GameState; dispatch: (action: Action) => void }) {
+  const [rows, setRows] = useState<ScoreRow[]>([]);
+
+  useEffect(() => {
+    const name = (localStorage.getItem(NAME_KEY) ?? "").trim() || "Sin nombre";
+    setRows(rememberScore({ name, score: state.score, at: Date.now(), cases: state.caseScores }));
+  }, [state.score, state.caseScores]);
+
   return (
     <section className="shell screen codex">
       <p className="kicker">Guardia completa</p>
       <h1>La diana era la diferencia</h1>
+      <p className="score-total">
+        <strong>{state.score}</strong>
+        <span>puntos en esta guardia</span>
+      </p>
+      <ol className="case-scores">
+        {state.caseScores.map((item) => (
+          <li key={item.caseIndex}>
+            <span>{item.title}</span>
+            <strong>{item.points}</strong>
+          </li>
+        ))}
+      </ol>
+      <ScoreBoard rows={rows} />
       <p className="lede narrow">
         Ningún antibiótico de esta guardia sirve para todo. Sirve el que encuentra una estructura que la bacteria necesita y la célula humana no usa igual: la pared, el ribosoma 70S, una enzima del ADN, el LPS o la fábrica de folato.
       </p>

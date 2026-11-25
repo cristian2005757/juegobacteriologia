@@ -542,6 +542,42 @@ tr:last-child td { border-bottom: 0; }
 .pips i.on { background: var(--gold); }
 .pips.is-fresh { animation: shake 0.35s ease; }
 .top-meta { display: flex; gap: 14px; align-items: center; color: var(--muted); font-size: 13px; }
+.quiz-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 196, 140, 0.4);
+  background: rgba(8, 20, 16, 0.62);
+  color: #f4efe6;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.quiz-pill strong { font-size: 15px; color: #d7ec9a; }
+.quiz-pill.is-late strong { color: #f0c85a; }
+.quiz-pill.is-slow strong { color: #f3a097; }
+.float-score { color: #e7d7a4; font-size: 22px; }
+.score-callout {
+  display: grid;
+  gap: 4px;
+  margin: 12px 0 16px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(23, 36, 30, 0.06);
+}
+.score-callout strong { font-family: Fraunces, Georgia, serif; font-size: 28px; line-height: 1; }
+.score-callout span { color: #5c6d64; font-size: 14px; line-height: 1.4; }
+.score-total { display: flex; align-items: baseline; gap: 10px; margin: 8px 0 12px; }
+.score-total strong { font-family: Fraunces, Georgia, serif; font-size: clamp(42px, 6vw, 72px); line-height: 0.9; color: var(--gold); }
+.case-scores { list-style: none; padding: 0; margin: 0 0 8px; max-width: 520px; }
+.case-scores li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(226, 196, 140, 0.2); }
+.board-wrap { margin: 8px 0 18px; max-width: 520px; }
+.board-wrap h2 { margin: 0 0 8px; font-size: 22px; }
+.board-empty { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.4; }
+.board { width: 100%; border-collapse: collapse; font-size: 15px; }
+.board th, .board td { text-align: left; padding: 7px 6px; border-bottom: 1px solid rgba(226, 196, 140, 0.22); }
+.board td:last-child, .board th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 
 .stage { min-height: 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.8fr); gap: 14px; }
 .arena, .ficha {
@@ -1257,6 +1293,7 @@ tr:last-child td { border-bottom: 0; }
   .dialog-line { font-size: 16px; min-height: 0; }
   .combat { padding: 10px 10px 8px; }
   .top-meta { width: 100%; flex-wrap: wrap; gap: 8px; }
+  .quiz-pill { white-space: normal; }
   .role-note { display: block; margin-top: 6px; }
   .peek { margin-bottom: 8px; }
   .banner { font-size: 13px; }
