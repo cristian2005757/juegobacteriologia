@@ -249,7 +249,7 @@ export function CombatScreen({
               />
               <div className="floats">
                 {enemyFloats.map((item) => (
-                  <span key={item.id} className={`float float-${item.kind}`}>
+                  <span key={item.id} className={`float float-${item.kind}${item.text.startsWith("-") ? " is-down" : ""}`}>
                     {item.text}
                   </span>
                 ))}
@@ -284,7 +284,7 @@ export function CombatScreen({
               </div>
               <div className="self-floats">
                 {selfFloats.map((item) => (
-                  <span key={item.id} className={`float float-${item.kind}`}>
+                  <span key={item.id} className={`float float-${item.kind}${item.text.startsWith("-") ? " is-down" : ""}`}>
                     {item.text}
                   </span>
                 ))}

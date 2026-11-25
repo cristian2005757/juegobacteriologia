@@ -558,6 +558,7 @@ tr:last-child td { border-bottom: 0; }
 .quiz-pill.is-late strong { color: #f0c85a; }
 .quiz-pill.is-slow strong { color: #f3a097; }
 .float-score { color: #e7d7a4; font-size: 22px; }
+.float-score.is-down { color: #f3a097; }
 .score-callout {
   display: grid;
   gap: 4px;

@@ -111,7 +111,7 @@ export function TitleScreen({ dispatch }: { dispatch: (action: Action) => void }
           <li>
             <b>6</b>
             <span>
-              <strong>Cada carta es una pregunta.</strong> Si encaja, empieza valiendo 100 puntos. Los primeros 8 segundos se mantienen; después baja 4 puntos por segundo, hasta 10. Si no encaja, vale 0. Al cerrar la guardia queda el puntaje.
+              <strong>Cada carta es una pregunta.</strong> Si encaja, empieza valiendo 100 puntos. Los primeros 8 segundos se mantienen; después baja 4 puntos por segundo, hasta 10. Si no encaja, resta 50. Al cerrar la guardia queda el puntaje.
             </span>
           </li>
         </ol>
@@ -321,7 +321,7 @@ export function DebriefScreen({ state, dispatch }: { state: GameState; dispatch:
         <p className="score-callout">
           <strong>{state.caseScores.at(-1)?.points ?? 0} puntos</strong>
           <span>
-            en este caso. La guardia lleva {state.score}. Una carta que encaja empieza en 100 y baja con el tiempo. Si no encaja, suma 0. Estos puntos quedan al ganar el caso.
+            en este caso. La guardia lleva {state.score}. Una carta que encaja empieza en 100 y baja con el tiempo. Si no encaja, resta 50. Estos puntos quedan al ganar el caso.
           </span>
         </p>
         <ul className="bitacora">

@@ -204,7 +204,7 @@ function playCard(state: GameState, index: number, elapsedMs: number): GameState
 
   const points = questionPoints(result.fits, elapsedMs);
   const seconds = Math.max(0, Math.round(Math.min(120_000, elapsedMs) / 1000));
-  if (points > 0) floats.push({ id: seq++, text: `+${points}`, kind: "score" });
+  if (points !== 0) floats.push({ id: seq++, text: `${points > 0 ? "+" : ""}${points}`, kind: "score" });
 
   return {
     ...state,

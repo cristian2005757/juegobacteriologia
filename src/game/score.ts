@@ -2,6 +2,7 @@ import type { CaseScore } from "./types";
 
 export const QUESTION_FULL = 100;
 export const QUESTION_FLOOR = 10;
+export const QUESTION_MISS = 50;
 export const QUESTION_GRACE_MS = 8000;
 export const QUESTION_DROP_PER_SECOND = 4;
 
@@ -16,7 +17,7 @@ export interface ScoreRow {
 }
 
 export function questionPoints(fits: boolean, elapsedMs: number): number {
-  if (!fits) return 0;
+  if (!fits) return -QUESTION_MISS;
   const elapsed = Math.min(120_000, Math.max(0, elapsedMs));
   const lateSeconds = Math.max(0, elapsed - QUESTION_GRACE_MS) / 1000;
   return Math.max(QUESTION_FLOOR, QUESTION_FULL - Math.floor(lateSeconds * QUESTION_DROP_PER_SECOND));
